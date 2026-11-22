@@ -1,0 +1,32 @@
+[package]
+name = "repo-manager"
+version = "0.3.0"
+description = "A lightweight desktop app that manages the git repos in a folder"
+edition = "2021"
+
+[lib]
+name = "repo_manager_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-updater = "2"
+time = { version = "0.3", features = ["formatting"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+default = ["custom-protocol"]
+# Serve the bundled frontend (src/) instead of a dev server.
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

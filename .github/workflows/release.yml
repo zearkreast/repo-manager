@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Publish a GitHub release (off = build check only)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Unit tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $v = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Check tag matches version
+        if: github.event_name == 'push'
+        shell: pwsh
+        run: |
+          $expected = "v${{ steps.version.outputs.version }}"
+          if ("${{ github.ref_name }}" -ne $expected) {
+            Write-Error "Tag ${{ github.ref_name }} does not match tauri.conf.json version ($expected)"
+            exit 1
+          }
+
+      - name: Build and publish release
+        if: github.event_name == 'push' || inputs.release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: npx --yes @tauri-apps/cli@2
+          tagName: v__VERSION__
+          releaseName: Repo Manager v__VERSION__
+          releaseBody: |
+            Windows build of Repo Manager v__VERSION__.
+
+            - `Repo.Manager_*_x64-setup.exe`: installer, updates itself
+            - `RepoManager_x64-portable.exe`: single exe, no install
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+
+      - name: Upload portable exe
+        if: github.event_name == 'push' || inputs.release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          Copy-Item src-tauri/target/release/repo-manager.exe RepoManager_x64-portable.exe
+          gh release upload "v${{ steps.version.outputs.version }}" RepoManager_x64-portable.exe --clobber
+
+      # No updater artifacts here, so the check build works without the signing secret.
+      - name: Build (check only)
+        if: github.event_name == 'workflow_dispatch' && !inputs.release
+        shell: bash
+        run: npx --yes @tauri-apps/cli@2 build --config '{"bundle":{"createUpdaterArtifacts":false}}'
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch' && !inputs.release
+        with:
+          name: repo-manager-windows
+          path: |
+            src-tauri/target/release/repo-manager.exe
+            src-tauri/target/release/bundle/nsis/*.exe

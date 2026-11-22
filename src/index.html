@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Repo Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
+
+  <div class="app">
+    <header class="titlebar" data-tauri-drag-region>
+      <div class="brand" data-tauri-drag-region>
+        <img class="brand-logo" src="logo.svg" alt="" data-tauri-drag-region>
+        <span class="brand-text" data-tauri-drag-region>Repo<svg class="brand-branch" viewBox="0 0 24 24" data-tauri-drag-region><path d="M6 3v12M18 9a9 9 0 0 1-9 9"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg>Manager</span>
+      </div>
+      <div class="win-ctrls">
+        <button class="win-btn settings" id="openSettings" data-i18n-title="win.settings" data-i18n-aria="win.settings"><svg viewBox="0 0 24 24" class="gear"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.66 0-1.25.4-1.51 1z"/></svg></button>
+        <i class="win-sep"></i>
+        <button class="win-btn" id="winMin" data-i18n-title="win.min" data-i18n-aria="win.min"><svg viewBox="0 0 12 12"><path d="M2.5 6h7"/></svg></button>
+        <button class="win-btn" id="winMax" data-i18n-title="win.max" data-i18n-aria="win.max"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" rx="1.6"/></svg></button>
+        <button class="win-btn close" id="winClose" data-i18n-title="win.close" data-i18n-aria="win.close"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="side-head">
+          <span class="side-title"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-i18n="side.title"></span></span>
+        </div>
+        <nav class="roots" id="roots">
+          <div class="sel-indicator" id="selIndicator"></div>
+        </nav>
+        <button class="side-add" id="addRoot">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <span data-i18n="side.add"></span>
+        </button>
+      </aside>
+
+      <main class="content">
+        <div class="toolbar">
+          <div class="crumb">
+            <h1 id="rootName">Repo Manager</h1>
+            <span id="rootPath" class="muted"></span>
+          </div>
+          <label class="search">
+            <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input id="search" type="search" data-i18n-ph="search.ph" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+          </label>
+          <button class="btn icon" id="refresh" data-i18n-title="refresh.title">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          </button>
+          <button class="btn primary" id="pullAll">
+            <svg class="ic spin-ic" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>
+            <span data-i18n="pullAll"></span>
+          </button>
+        </div>
+
+        <section class="table" id="table">
+          <div class="thead">
+            <span data-i18n="th.repo"></span>
+            <span data-i18n="th.desc"></span>
+            <span class="ta-r" data-i18n="th.actions"></span>
+          </div>
+          <div class="tbody" id="rows"></div>
+
+          <form class="add-pill" id="addForm" autocomplete="off">
+            <span class="add-label" data-i18n="add.label"></span>
+            <input id="addUrl" type="text" data-i18n-ph="add.ph" spellcheck="false">
+            <button class="btn small primary" type="submit" id="addBtn">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="add.btn"></span>
+            </button>
+            <i class="add-progress" id="addProgress"></i>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <footer class="statusbar">
+      <span class="build"><span data-i18n="status.build"></span> <i class="dot"></i> <code id="buildHash">—</code></span>
+      <span class="status-text" id="statusText"></span>
+      <button class="update-pill" id="updatePill" hidden></button>
+      <span class="version"><b class="channel" id="channel">alpha</b><span id="version">v0.3.0</span></span>
+    </footer>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+  <div class="popover" id="popover"></div>
+  <div class="toasts" id="toasts"></div>
+
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+# Build output
+/src-tauri/target/
+/src-tauri/gen/
+/dist/
+node_modules/
+*.log
+
+# Local design files and screenshots, kept out of the repo
+local.project.files/
+
+# Secrets and signing keys (the updater key lives in ~/.tauri)
+.env
+.env.*
+*.key
+*.key.pub
+*.pem
+*.pfx
+*.p12
+
+# Editors and the OS
+.vscode/
+.idea/
+.vs/
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# LLM and AI assistant files
+.claude/
+.cursor/
+.mcp.json
+settings.local.json
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+GEMINI.md
+MEMORY.md
+memories.md
+HANDOFF.md
